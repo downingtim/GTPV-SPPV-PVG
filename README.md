@@ -1,6 +1,6 @@
 # Pangenomic variation graph analysis of sheeppox (SPPV) and goatpox (GTPV) viruses 🧬
 
-This repository contains the R and Shell scripts used for a comparative genomic analysis of Sheeppox Virus (SPPV) and Goatpox Virus (GTPV). The analyses focus on phylogeny, genetic diversity through Principal Component Analysis (PCA), and the distribution of Single Nucleotide Variants (SNVs) across the viral genomes.
+This repository contains the R and Shell scripts used for a pangenomic variation graph (PVG) analysis of Sheeppox Virus (SPPV) and Goatpox Virus (GTPV), focusing on analyses of genomic diversity.
 
 ## Repository Structure
 
@@ -30,7 +30,7 @@ These scripts perform phylogenetic analysis and Principal Component Analysis (PC
 * **Output Files**:
     * `goatpox_phylogeny.pdf`/`.png` or `sheeppox_phylogeny.pdf`/`.png`
     * `goatpox_pca.pdf` or `sheeppox_pca.pdf`
-    * `sheeppox_pca.PC3.PC4.pdf` (for SPPV script only)
+    * `sheeppox_pca.PC3.PC4.pdf` (for SPPV only)
     * `goatpox_combined_analysis.pdf`/`.png` or `sheeppox_combined_analysis.pdf`/`.png`
 
 ### **`02_count_vcf.sh`**
