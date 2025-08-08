@@ -112,15 +112,13 @@ The directory also contains several other figures related to pan-genomic analyse
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
-    cd <repository-name>
+    git clone https://github.com/downingtim/GTPV-SPPV-PVG
+    cd GTPV-SPPV-PVG
     ```
 2.  **Prepare Input Data**: Make sure all required input files (`.vcf`, `.aln`, `.gb`, `.supportTBE`) are present in the correct paths as specified in the scripts. You may need to create directories like `results_SPPV/vcf/`.
+
 3.  **Execute a script**: Run any of the R scripts from the terminal using the `Rscript` command.
     ```bash
     # Example for running the SPPV phylogeny/PCA script
     Rscript scripts/01_phylogeny_PCA.SPPV.R
-
-    # Example for running the main SNP density script
-    Rscript scripts/03_SNP_density.R
     ```
