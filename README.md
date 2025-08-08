@@ -1,6 +1,6 @@
-# Pangenomic variation graph analysis of sheeppox (SPPV) and goatpox (GTPV) viruses 🧬
+# Pangenome variation graph (PVG) analysis of sheeppox (SPPV) and goatpox (GTPV) viruses 🧬
 
-This repository contains the R and Shell scripts used for a pangenomic variation graph (PVG) analysis of Sheeppox Virus (SPPV) and Goatpox Virus (GTPV), focusing on analyses of genomic diversity.
+This repository contains the R and Shell scripts used for a pangenome variation graph (PVG) analysis of Sheeppox Virus (SPPV) and Goatpox Virus (GTPV), focusing on analyses of genomic diversity.
 
 ## Repository Structure
 
