@@ -1,0 +1,4 @@
+makeblastdb -in NC_004002.1.fa -dbtype nucl -out NC_004002_DB
+blastn -db NC_004002_DB -query MN072626.1.fa -out  MN072626_NC_004002_DB.out -outfmt 6
+
+blastn -db NC_004002_2500_DB -query MN072626.1.2500.fa -out  MN072626_NC_004002_DB.2500.out -outfmt 6
