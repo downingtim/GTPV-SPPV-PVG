@@ -65,6 +65,69 @@ calculate_snv_density <- function(snv_data, window_size_kb = 2, step_size_bp = 5
   return(window_results)
 }
 
+# Function to calculate SNVs per kb for specific genomic regions
+calculate_region_snv_density <- function(snv_data, regions_df, sample_name) {
+  results <- data.frame()
+  
+  for(i in 1:nrow(regions_df)) {
+    start_pos <- regions_df$start[i]
+    end_pos <- regions_df$end[i]
+    gene_label <- regions_df$label[i]
+    
+    # Count SNVs within this region
+    snvs_in_region <- sum(snv_data$POS >= start_pos & snv_data$POS <= end_pos)
+    
+    # Calculate region length in kb
+    region_length_bp <- end_pos - start_pos + 1
+    region_length_kb <- region_length_bp / 1000
+    
+    # Calculate SNVs per kb
+    snvs_per_kb <- snvs_in_region / region_length_kb
+    
+    # Store results
+    results <- rbind(results, data.frame(
+      Gene = paste0("LSDV", sprintf("%03d", as.numeric(gene_label))),
+      Start = start_pos,
+      End = end_pos,
+      Length_bp = region_length_bp,
+      Length_kb = round(region_length_kb, 3),
+      SNV_count = snvs_in_region,
+      SNVs_per_kb = round(snvs_per_kb, 2),
+      Sample = sample_name,
+      stringsAsFactors = FALSE
+    ))
+  }
+  
+  return(results)
+}
+
+# Function to perform random resampling of genomic regions
+random_region_sampling <- function(snv_data, genome_length, n_samples = 1000, seed = 123) {
+  set.seed(seed)
+  
+  # Calculate average gene length from our highlight regions
+  avg_gene_length <- mean(all_highlight_regions$end - all_highlight_regions$start + 1)
+  
+  # Store results
+  random_snvs_per_kb <- numeric(n_samples)
+  
+  for(i in 1:n_samples) {
+    # Generate random start position (ensuring we don't go beyond genome)
+    max_start <- genome_length - avg_gene_length + 1
+    random_start <- sample(1:max_start, 1)
+    random_end <- random_start + avg_gene_length - 1
+    
+    # Count SNVs in this random region
+    snvs_in_region <- sum(snv_data$POS >= random_start & snv_data$POS <= random_end)
+    
+    # Calculate SNVs per kb
+    region_length_kb <- avg_gene_length / 1000
+    random_snvs_per_kb[i] <- snvs_in_region / region_length_kb
+  }
+  
+  return(random_snvs_per_kb)
+}
+
 # Main analysis
 tryCatch({
   # File paths
@@ -104,16 +167,23 @@ tryCatch({
 
   # Read GenBank files for CDS annotations
   cat("Reading GenBank files...\n")
-  # FIX: Use readGenBank() to parse the files into S4 objects, not just store the filenames
   sppv_gb <- genbankr::readGenBank("nc_004002.gb")
   gtpv_gb <- genbankr::readGenBank("nc_004003.gb")
 
   # Define regions of interest to highlight
   highlight_regions <- data.frame(
-    start = c(32000, 65000, 81000, 118000),
-    end = c(34000, 67000, 84000, 121000),
-    label = c("32-34 Kb", "65-67 Kb", "81-84 Kb", "118-121 Kb")
-  )
+  start = c(390, 1768, 5427, 7422, 17199, 118888, 128515, 147380, 148325),
+  end = c(1231, 2342, 6182, 8557, 18470, 119899, 129451, 147889, 149466),
+  label = c("002", "004", "009", "013", "026", "132", "136", "153","155"))
+
+  highlight_regions2 <- data.frame(
+  start = c(7759, 11558, 56791, 121407, 132499, 134652, 136343, 139663, 141206, 144149),
+  end = c(8594, 13246, 57381, 127430, 133176, 136295, 138247, 141159, 142549, 145807),
+  label = c("012", "019", "067", "134", "141", "144", "145", "147", "148", "151")
+)
+
+  # Combine both highlight regions for complete analysis
+  all_highlight_regions <- rbind(highlight_regions, highlight_regions2)
 
   # Create the main SNV density plot
   cat("Creating SNV density plot...\n")
@@ -121,7 +191,9 @@ tryCatch({
     geom_rect(data = highlight_regions,
               aes(xmin = start/1000, xmax = end/1000, ymin = -Inf, ymax = Inf),
               fill = "darkorange", alpha = 0.5, inherit.aes = FALSE) +
-    # FIX: Use 'linewidth' instead of the deprecated 'size' argument
+    geom_rect(data = highlight_regions2,
+              aes(xmin = start/1000, xmax = end/1000, ymin = -Inf, ymax = Inf),
+              fill = "purple", alpha = 0.5, inherit.aes = FALSE) +
     geom_line(linewidth = 1.4, alpha = 0.8) +
     scale_color_manual(values = c("SPPV" = "#E31A1C", "GTPV" = "#1F78B4")) +
     scale_x_continuous(breaks = seq(0, max(snv_density$window_center/1000), by = 10),
@@ -132,16 +204,12 @@ tryCatch({
       axis.title = element_text(size = 12),
       legend.title = element_blank(),
       legend.text = element_text(size = 12),
-      # FIX: Use 'legend.position.inside' for numeric coordinates
       legend.position.inside = c(0.94, 0.98),
       legend.justification = c(1, 1),
-      # FIX: Use 'linewidth' for rect borders
       legend.background = element_rect(fill = "white", color = "gray80", linewidth = 0.5),
       legend.margin = margin(8, 12, 8, 12),
-      # FIX: Use 'linewidth' for grid lines
       panel.grid.minor = element_line(color = "gray85", linewidth = 0.3),
       panel.grid.major = element_line(color = "gray70", linewidth = 0.6),
-      # FIX: Use 'linewidth' for the panel border
       panel.border = element_rect(color = "gray80", fill = NA, linewidth = 0.5)
     ) +
     guides(color = guide_legend(override.aes = list(size = 4, alpha = 1)))
@@ -154,8 +222,6 @@ tryCatch({
              end = end,
              strand = as.character(strand),
              y = ifelse(strand == "+", 1, -1),
-             # NOTE: This logic is static; it always colors CDS grey.
-             # You may want to implement logic to check for overlaps with 'highlight_regions'.
              highlight = ifelse(0, "darkorange", "grey50")
       )
 
@@ -163,6 +229,9 @@ tryCatch({
       geom_rect(data = highlight_regions,
                 aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf),
                 fill = "darkorange", alpha = 0.7, inherit.aes = FALSE) +
+      geom_rect(data = highlight_regions2,
+                aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf),
+                fill = "purple", alpha = 0.7, inherit.aes = FALSE) +
       geom_rect(aes(fill = highlight), color = "black", linewidth = 0.15) +
       scale_fill_identity() +
       geom_hline(yintercept = 0, color = "black", linewidth = 0.4) +
@@ -175,10 +244,8 @@ tryCatch({
       theme(axis.text.y = element_blank(),
             axis.ticks.y = element_blank(),
             axis.title.y = element_text(size = 10, face = "bold"),
-            # FIX: Use 'linewidth' for grid lines
             panel.grid.minor = element_line(color = "gray85", linewidth = 0.3),
             panel.grid.major = element_line(color = "gray70", linewidth = 0.6),
-            # FIX: Use 'linewidth' for the panel border
             panel.border = element_rect(color = "gray80", fill = NA, linewidth = 0.5))
     return(cds_plot)
   }
@@ -207,6 +274,154 @@ tryCatch({
       .groups = 'drop'
     )
   print(density_summary)
+
+  # ========== Gene-based SNV Analysis ==========
+
+  # Calculate SNV density for each gene region for both samples
+  cat("\nCalculating SNV density for gene regions...\n")
+
+  # GTPV analysis
+  gtpv_gene_snvs <- calculate_region_snv_density(gtpv_snvs, all_highlight_regions, "GTPV")
+
+  # SPPV analysis  
+  sppv_gene_snvs <- calculate_region_snv_density(sppv_snvs, all_highlight_regions, "SPPV")
+
+  # Create formatted tables
+  cat("\n=== Table 1: GTPV Gene SNV Analysis ===\n")
+  gtpv_table <- gtpv_gene_snvs[, c("Gene", "Start", "End", "Length_kb", "SNV_count", "SNVs_per_kb")]
+  gtpv_table <- gtpv_table[order(as.numeric(gsub("LSDV", "", gtpv_table$Gene))), ]
+  print(gtpv_table, row.names = FALSE)
+
+  cat("\n=== Table 2: SPPV Gene SNV Analysis ===\n")
+  sppv_table <- sppv_gene_snvs[, c("Gene", "Start", "End", "Length_kb", "SNV_count", "SNVs_per_kb")]
+  sppv_table <- sppv_table[order(as.numeric(gsub("LSDV", "", sppv_table$Gene))), ]
+  print(sppv_table, row.names = FALSE)
+
+  # Save tables to CSV files
+  write.csv(gtpv_table, "GTPV_gene_SNV_analysis.csv", row.names = FALSE)
+  write.csv(sppv_table, "SPPV_gene_SNV_analysis.csv", row.names = FALSE)
+
+  # Create a comparison table
+  cat("\n=== Comparison Table: GTPV vs SPPV SNVs per kb ===\n")
+  comparison_table <- merge(
+    gtpv_table[, c("Gene", "SNVs_per_kb")], 
+    sppv_table[, c("Gene", "SNVs_per_kb")], 
+    by = "Gene", 
+    suffixes = c("_GTPV", "_SPPV")
+  )
+  comparison_table$Difference <- comparison_table$SNVs_per_kb_SPPV - comparison_table$SNVs_per_kb_GTPV
+  comparison_table <- comparison_table[order(as.numeric(gsub("LSDV", "", comparison_table$Gene))), ]
+  print(comparison_table, row.names = FALSE)
+
+  # Save comparison table
+  write.csv(comparison_table, "SNV_comparison_GTPV_vs_SPPV.csv", row.names = FALSE)
+
+  # Summary statistics for gene regions
+  cat("\n=== Summary Statistics ===\n")
+  cat("GTPV genes - Mean SNVs/kb:", round(mean(gtpv_table$SNVs_per_kb), 2), "\n")
+  cat("GTPV genes - Median SNVs/kb:", round(median(gtpv_table$SNVs_per_kb), 2), "\n")
+  cat("SPPV genes - Mean SNVs/kb:", round(mean(sppv_table$SNVs_per_kb), 2), "\n")
+  cat("SPPV genes - Median SNVs/kb:", round(median(sppv_table$SNVs_per_kb), 2), "\n")
+
+  # Identify genes with highest SNV density
+  if(nrow(gtpv_table) > 0) {
+    cat("\nTop 5 genes with highest SNV density in GTPV:\n")
+    top_gtpv <- gtpv_table[order(gtpv_table$SNVs_per_kb, decreasing = TRUE)[1:min(5, nrow(gtpv_table))], c("Gene", "SNVs_per_kb")]
+    print(top_gtpv, row.names = FALSE)
+  }
+
+  if(nrow(sppv_table) > 0) {
+    cat("\nTop 5 genes with highest SNV density in SPPV:\n")
+    top_sppv <- sppv_table[order(sppv_table$SNVs_per_kb, decreasing = TRUE)[1:min(5, nrow(sppv_table))], c("Gene", "SNVs_per_kb")]
+    print(top_sppv, row.names = FALSE)
+  }
+
+  # ========== Random Resampling Analysis ==========
+  
+  # Calculate overall SNV density (total SNVs / genome length in kb)
+  genome_length <- 151000  # Approximate genome length in bp
+  genome_length_kb <- genome_length / 1000
+  
+  gtpv_overall_density <- nrow(gtpv_snvs) / genome_length_kb
+  sppv_overall_density <- nrow(sppv_snvs) / genome_length_kb
+  
+  cat("\n=== Overall Genome SNV Density ===\n")
+  cat("GTPV overall SNVs/Kb:", round(gtpv_overall_density, 3), "\n")
+  cat("SPPV overall SNVs/Kb:", round(sppv_overall_density, 3), "\n")
+  
+  # Perform random resampling
+  cat("\n=== Random Region Resampling Analysis ===\n")
+  cat("Performing random resampling (1000 iterations)...\n")
+  
+  gtpv_random_snvs <- random_region_sampling(gtpv_snvs, genome_length)
+  sppv_random_snvs <- random_region_sampling(sppv_snvs, genome_length)
+  
+  # Calculate statistics for random regions
+  gtpv_random_mean <- mean(gtpv_random_snvs)
+  gtpv_random_sd <- sd(gtpv_random_snvs)
+  gtpv_random_median <- median(gtpv_random_snvs)
+  
+  sppv_random_mean <- mean(sppv_random_snvs)
+  sppv_random_sd <- sd(sppv_random_snvs)
+  sppv_random_median <- median(sppv_random_snvs)
+  
+  cat("\nGTPV Random Regions (n=1000):\n")
+  cat("  Mean SNVs/Kb:", round(gtpv_random_mean, 3), "\n")
+  cat("  Standard Deviation:", round(gtpv_random_sd, 3), "\n")
+  cat("  Median SNVs/Kb:", round(gtpv_random_median, 3), "\n")
+  cat("  Range:", round(min(gtpv_random_snvs), 3), "-", round(max(gtpv_random_snvs), 3), "\n")
+  
+  cat("\nSPPV Random Regions (n=1000):\n")
+  cat("  Mean SNVs/Kb:", round(sppv_random_mean, 3), "\n")
+  cat("  Standard Deviation:", round(sppv_random_sd, 3), "\n")
+  cat("  Median SNVs/Kb:", round(sppv_random_median, 3), "\n")
+  cat("  Range:", round(min(sppv_random_snvs), 3), "-", round(max(sppv_random_snvs), 3), "\n")
+  
+  # Compare gene regions to random expectation
+  cat("\n=== Comparison: Gene Regions vs Random Expectation ===\n")
+  
+  # Calculate how many standard deviations away from random mean
+  gtpv_gene_mean <- mean(gtpv_table$SNVs_per_kb)
+  sppv_gene_mean <- mean(sppv_table$SNVs_per_kb)
+  
+  gtpv_z_score <- (gtpv_gene_mean - gtpv_random_mean) / gtpv_random_sd
+  sppv_z_score <- (sppv_gene_mean - sppv_random_mean) / sppv_random_sd
+  
+  cat("GTPV:\n")
+  cat("  Gene regions mean:", round(gtpv_gene_mean, 3), "SNVs/Kb\n")
+  cat("  Random regions mean:", round(gtpv_random_mean, 3), "SNVs/Kb\n")
+  cat("  Difference:", round(gtpv_gene_mean - gtpv_random_mean, 3), "SNVs/Kb\n")
+  cat("  Z-score:", round(gtpv_z_score, 2), "\n")
+  cat("  Interpretation:", if(abs(gtpv_z_score) > 2) "Significantly different" else "Not significantly different", "from random\n")
+  
+  cat("\nSPPV:\n")
+  cat("  Gene regions mean:", round(sppv_gene_mean, 3), "SNVs/Kb\n")
+  cat("  Random regions mean:", round(sppv_random_mean, 3), "SNVs/Kb\n")
+  cat("  Difference:", round(sppv_gene_mean - sppv_random_mean, 3), "SNVs/Kb\n")
+  cat("  Z-score:", round(sppv_z_score, 2), "\n")
+  cat("  Interpretation:", if(abs(sppv_z_score) > 2) "Significantly different" else "Not significantly different", "from random\n")
+  
+  # Save random sampling results
+  random_results <- data.frame(
+    Sample = rep(c("GTPV", "SPPV"), each = 1000),
+    Random_SNVs_per_Kb = c(gtpv_random_snvs, sppv_random_snvs)
+  )
+  write.csv(random_results, "random_sampling_results.csv", row.names = FALSE)
+  
+  # Summary table
+  summary_comparison <- data.frame(
+    Sample = c("GTPV", "SPPV"),
+    Overall_SNVs_per_Kb = c(gtpv_overall_density, sppv_overall_density),
+    Gene_Regions_Mean = c(gtpv_gene_mean, sppv_gene_mean),
+    Random_Regions_Mean = c(gtpv_random_mean, sppv_random_mean),
+    Random_Regions_SD = c(gtpv_random_sd, sppv_random_sd),
+    Z_Score = c(gtpv_z_score, sppv_z_score),
+    stringsAsFactors = FALSE
+  )
+  
+  cat("\n=== Summary Comparison Table ===\n")
+  print(summary_comparison, row.names = FALSE)
+  write.csv(summary_comparison, "SNV_density_summary_comparison.csv", row.names = FALSE)
 
 }, error = function(e) {
   cat("Error occurred:", e$message, "\n")
