@@ -1,0 +1,79 @@
+BLASTN 2.9.0+
+
+
+Reference: Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb
+Miller (2000), "A greedy algorithm for aligning DNA sequences", J
+Comput Biol 2000; 7(1-2):203-14.
+
+
+
+Database: NC_004002.1.403.fa
+           1 sequences; 403 total letters
+
+
+
+Query= MN072626.1 Sheeppox virus isolate Abu Gharib, complete genome
+
+Length=2500
+                                                                      Score        E
+Sequences producing significant alignments:                          (Bits)     Value
+
+NC_004002.1 Sheeppox virus 17077-99, complete genome                  446        5e-129
+
+
+>NC_004002.1 Sheeppox virus 17077-99, complete genome
+Length=403
+
+ Score = 446 bits (241),  Expect = 5e-129
+ Identities = 343/384 (89%), Gaps = 40/384 (10%)
+ Strand=Plus/Plus
+
+Query  1374  ATCTTTTTTCACATTCGTTTCTAACTATAACACTTGAAC---------TTACACAACTAA  1424
+             || ||||||||||||||||||||||||||||||||||||         ||||||||||||
+Sbjct  20    ATTTTTTTTCACATTCGTTTCTAACTATAACACTTGAACTTACATGTTTTACACAACTAA  79
+
+Query  1425  TATCTGTTGTTATAACAAATTCCAAATCATAATCTTTGAAACTT---------ACGTATG  1475
+             ||||||||||||||||||||||||||||||||||||||||||||         |||||||
+Sbjct  80    TATCTGTTGTTATAACAAATTCCAAATCATAATCTTTGAAACTTACACTCTCAACGTATG  139
+
+Query  1476  ATTTCATTTCTGTAGTTACTTGATCGCAAGAAATTGACAATGATATTCTCTTAGCACACT  1535
+             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  140   ATTTCATTTCTGTAGTTACTTGATCGCAAGAAATTGACAATGATATTCTCTTAGCACACT  199
+
+Query  1536  GTGGCAGCGAATTCAGAGTTGT---------------TATTTCCATATATACATATTTAC  1580
+             ||||||||||||||||||||||               |||||||||||||||||||||||
+Sbjct  200   GTGGCAGCGAATTCAGAGTTGTTATATTACTGGTTGATATTTCCATATATACATATTTAC  259
+
+Query  1581  CCAATGCATAAACTGCTTCGTTAACACTATCTAATATAAAGTTGTTTTGTGTTTTTTCTT  1640
+             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  260   CCAATGCATAAACTGCTTCGTTAACACTATCTAATATAAAGTTGTTTTGTGTTTTTTCTT  319
+
+Query  1641  TGGAACAATCATCATGTGCAA-------AAATCCATTTCCCTCTGTTAGAAGTCCTCCAG  1693
+             |||||||||||||||||||||       ||||||||||||||||||||||||||||||||
+Sbjct  320   TGGAACAATCATCATGTGCAAAAATTTTAAATCCATTTCCCTCTGTTAGAAGTCCTCCAG  379
+
+Query  1694  GTCCTTGAATTTTATAACAGCCAG  1717
+             ||||||||||||||||||||||||
+Sbjct  380   GTCCTTGAATTTTATAACAGCCAG  403
+
+
+
+Lambda      K        H
+    1.33    0.621     1.12 
+
+Gapped
+Lambda      K        H
+    1.28    0.460    0.850 
+
+Effective search space used: 969930
+
+
+  Database: NC_004002.1.403.fa
+    Posted date:  Aug 11, 2025  11:03 AM
+  Number of letters in database: 403
+  Number of sequences in database:  1
+
+
+
+Matrix: blastn matrix 1 -2
+Gap Penalties: Existence: 0, Extension: 2.5
