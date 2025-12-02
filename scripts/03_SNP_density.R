@@ -198,7 +198,7 @@ tryCatch({
     scale_color_manual(values = c("SPPV" = "#E31A1C", "GTPV" = "#1F78B4")) +
     scale_x_continuous(breaks = seq(0, max(snv_density$window_center/1000), by = 10),
                        minor_breaks = seq(0, max(snv_density$window_center/1000), by = 5)) +
-    labs(x = "Genome position (kb)", y = "SNVs per kb") +
+    labs(x = "Genome position (kb)", y = "SNPs/Kb") +
     theme_minimal() +
     theme(
       axis.title = element_text(size = 12),
@@ -222,8 +222,7 @@ tryCatch({
              end = end,
              strand = as.character(strand),
              y = ifelse(strand == "+", 1, -1),
-             highlight = ifelse(0, "darkorange", "grey50")
-      )
+             highlight = ifelse(0, "darkorange", "grey50")      )
 
     cds_plot <- ggplot(cds_data, aes(xmin = start, xmax = end, ymin = 0, ymax = y)) +
       geom_rect(data = highlight_regions,
