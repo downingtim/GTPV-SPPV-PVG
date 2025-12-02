@@ -104,6 +104,16 @@ Extended versions of the phylogenetic and PCA analysis scripts with additional f
 * **Dependencies (R Packages)**: `ggplot2`, `dplyr`, statistical packages for diversity calculations.
 * **Output Files**: Diversity plots and statistical summaries.
 
+### **09_create_genbank_table.sh**
+
+* **Purpose**: Create table of aligned genes based on GenBank file input.
+* **Output Files**: Table TSV files with gene coordinates.
+
+### **10_get_genbank_info.sh**
+
+* **Purpose**: Retrieve GenBank info for LSDV, GTPV & SPPV
+* **Output Files**: GenBank tabular data for each species
+
 ***
 
 ## Data Files 📊
@@ -123,6 +133,7 @@ Extended versions of the phylogenetic and PCA analysis scripts with additional f
 
 ### **Analysis Results**
 * `TABLES/SNV_comparison_GTPV_vs_SPPV.csv`: Comparative analysis of single nucleotide variants between virus types
+* `TABLES/LSDV_GTPV_SPPV.tsv`: Table of aligned genes' coordinates across LSDV, GTPV and SPPV.
 
 ***
 
@@ -136,6 +147,11 @@ The `FIGURES/` directory contains all outputs organised by analysis type and vir
 
 #### **GTPV-Specific Analyses**
 The `FIGURES/GTPV/` directory contains:
+* `GENOME/`: A folder containing info for each gene as LSDVXXX:
+  *`LSDVXXX_GTPV_combined.pdf`: Phylogenetic & PCA visualisations of diversity for gene whose LSDV ID is XXX.
+  *`LSDVXXX_sliding_window.png`: Diversity per clade across gene whose LSDV ID is XXX.
+  *`similarity_matrices_LSDVXXX.csv`: Pairwise matrix of percent similarity across samples for gene whose LSDV ID is XXX
+  *`region_LSDVXXX.aln`: Sequences for samples at gene whose LSDV ID is XXX.
 * `goatpox_combined_analysis.pdf`: Combined phylogenetic tree and PCA plot
 * `pangrowth.pdf`: Pangenome growth curve analysis
 * `p_core.pdf`: Core genome size estimates
@@ -147,6 +163,11 @@ The `FIGURES/GTPV/` directory contains:
 
 #### **SPPV-Specific Analyses**
 The `FIGURES/SPPV/` directory contains:
+* `GENOME/`: A folder containing info for each gene as LSDVXXX:
+  *`LSDVXXX_GTPV_combined.pdf`: Phylogenetic & PCA visualisations of diversity for gene whose LSDV ID is XXX.
+  *`LSDVXXX_sliding_window.png`: Diversity per clade across gene whose LSDV ID is XXX.
+  *`similarity_matrices_LSDVXXX.csv`: Pairwise matrix of percent similarity across samples for gene whose LSDV ID is XXX
+  *`region_LSDVXXX.aln`: Sequences for samples at gene whose LSDV ID is XXX.
 * `sheeppox_combined_analysis.pdf`: Combined phylogenetic tree and PCA plot
 * `sheeppox_pca.PC3.PC4.pdf`: PCA plot using the 3rd and 4th principal components
 * `pangrowth.pdf`: Pangenome growth curve analysis
@@ -200,32 +221,37 @@ The `FIGURES/SPPV/` directory contains:
     Rscript scripts/03_SNP_density.R
     Rscript scripts/03_SNP_density.ITR.R
     
+    # Sequence processing 
+    bash scripts/06_seqs.sh
+
     # Advanced analyses
     python scripts/05_genome_analysis.SPPV.py
     python scripts/05_genome_analysis.GTPV.py
-    
-    # Sequence processing and network analysis
-    bash scripts/06_seqs.sh
+
+    # Phylogeny and PCA
+    Rscript 04_phylogeny_PCA.GTPV.R
+    Rscript 04_phylogeny_PCA.SPPV.R
+
+    # Network analysis
     bash scripts/07_network.sh
     
     # Diversity analysis
     Rscript scripts/08_diversity.R
-    ```
 
-### Workflow Overview
+    # genbank table (run in order shown)
+    sh 10_get_genbank_info.sh
+    sh 09_create_genbank_table.sh
 
-1. **Data Preparation**: Process FASTA files and prepare reference genomes
-2. **Phylogenetic Analysis**: Construct phylogenetic trees and perform PCA
-3. **Variant Calling**: Identify and quantify genomic variants
-4. **Pangenome Analysis**: Build pangenome graphs and analyse core/accessory genes
-5. **Diversity Analysis**: Calculate genetic diversity metrics
-6. **Visualisation**: Generate comprehensive plots and figures
+
+```
 
 ***
 
 ## Citation
 
-If you use this code or analysis pipeline in your research, please cite the associated publication and this repository.
+If you use this code or analysis pipeline in your research, please cite:
+   Downing T. Insights into goatpox virus and sheeppox virus genomes from pangenome graphs.
+   github.com/downingtim/GTPV-SPPV-PVG/
 
 ***
 
