@@ -114,6 +114,11 @@ Extended versions of the phylogenetic and PCA analysis scripts with additional f
 * **Purpose**: Retrieve GenBank info for LSDV, GTPV & SPPV
 * **Output Files**: GenBank tabular data for each species
 
+### **11_diversity_metrics.py**
+
+* **Purpose**: Compute SNPs/Kb and mutations/Kb for each gene in GTPV and SPPV.
+* **Output Files**: Tables of diversity metrics (CSV format).
+
 ***
 
 ## Data Files 📊
@@ -134,6 +139,7 @@ Extended versions of the phylogenetic and PCA analysis scripts with additional f
 ### **Analysis Results**
 * `TABLES/SNV_comparison_GTPV_vs_SPPV.csv`: Comparative analysis of single nucleotide variants between virus types
 * `TABLES/LSDV_GTPV_SPPV.tsv`: Table of aligned genes' coordinates across LSDV, GTPV and SPPV.
+* `TABLES/diversity_metrics.csv`: Table of the LSDV-linked genes, showing the GTPV_SNPs/Kb, GTPV_Mutations/Kb, SPPV_SNPs/Kb and SPPV_Mutations/Kb.
 
 ***
 
@@ -144,6 +150,7 @@ The `FIGURES/` directory contains all outputs organised by analysis type and vir
 #### **Main Figures**
 * `Figure_3_snv_density_with_cds.pdf`: Genome-wide SNV density plotted against gene locations for SPPV and GTPV.
 * `Figure_S3_snv_density_terminal_regions.pdf`: Focused view of SNV density in the terminal regions of the genomes.
+* `Figure_snps_kb_correlation.png`: The association of SNPs/Kb in GTPV vs SPPV for each gene with a linear model displayed (blue).
 
 #### **GTPV-Specific Analyses**
 The `FIGURES/GTPV/` directory contains:
@@ -257,7 +264,7 @@ If you use this code or analysis pipeline in your research, please cite:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details
 
 ***
 
