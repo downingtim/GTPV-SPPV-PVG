@@ -1,6 +1,5 @@
 # R script to compare SNVs/Kb between SPPV and GTPV samples
 # Reads VCF files and GenBank files, creates a comparative plot with CDS annotations
-
 library(ggplot2)
 library(dplyr)
 library(readr)
@@ -21,12 +20,9 @@ read_vcf_snvs <- function(vcf_path, sample_name) {
                          col.names = c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"))
 
   # Filter for SNVs only
-  snv_data <- vcf_data[grepl("TYPE=snv", vcf_data$INFO), ]
-
-  # Add sample name
+  snv_data <- vcf_data[grepl("TYPE=snv", vcf_data$INFO), ] %>%  arrange(POS) %>%  distinct(POS, .keep_all = TRUE)
   snv_data$Sample <- sample_name
-
-  return(snv_data[, c("CHROM", "POS", "Sample")])
+  return(snv_data)
 }
 
 # Function to calculate SNVs per kb using sliding windows
@@ -154,10 +150,6 @@ tryCatch({
   gtpv_range <- range(gtpv_snvs$POS)
   cat("SPPV position range:", sppv_range[1], "-", sppv_range[2], "\n")
   cat("GTPV position range:", gtpv_range[1], "-", gtpv_range[2], "\n")
-
-  # Calculate SNV density using sliding windows (1kb windows, 100bp steps)
-  cat("\nCalculating SNV density using sliding windows (1kb windows, 100bp steps)...\n")
-
   # Process each sample separately to handle different position ranges
   sppv_density <- calculate_snv_density(sppv_snvs, window_size_kb = 2, step_size_bp = 50)
   gtpv_density <- calculate_snv_density(gtpv_snvs, window_size_kb = 2, step_size_bp = 50)
@@ -198,7 +190,7 @@ tryCatch({
     scale_color_manual(values = c("SPPV" = "#E31A1C", "GTPV" = "#1F78B4")) +
     scale_x_continuous(breaks = seq(0, max(snv_density$window_center/1000), by = 10),
                        minor_breaks = seq(0, max(snv_density$window_center/1000), by = 5)) +
-    labs(x = "Genome position (kb)", y = "SNPs/Kb") +
+    labs(x = "Genome position (kb)", y = "Mutations/Kb") +
     theme_minimal() +
     theme(
       axis.title = element_text(size = 12),
@@ -242,7 +234,7 @@ tryCatch({
       scale_y_continuous(breaks = c(-1, 1), labels = c("-", "+")) +
       theme(axis.text.y = element_blank(),
             axis.ticks.y = element_blank(),
-            axis.title.y = element_text(size = 10, face = "bold"),
+            axis.title.y = element_text(size = 14, face = "bold"),
             panel.grid.minor = element_line(color = "gray85", linewidth = 0.3),
             panel.grid.major = element_line(color = "gray70", linewidth = 0.6),
             panel.border = element_rect(color = "gray80", fill = NA, linewidth = 0.5))
@@ -257,9 +249,7 @@ tryCatch({
   # Combine all plots
   cat("Combining plots...\n")
   final_plot <- snv_plot / sppv_cds_plot / gtpv_cds_plot +
-    plot_layout(heights = c(4, 1.1, 1.1))
-
-  # Save the combined plot
+    plot_layout(heights = c(5, 1, 1))
   ggsave("snv_density_with_cds.png", plot = final_plot, width = 10, height = 6, dpi = 300)
   ggsave("snv_density_with_cds.pdf", plot = final_plot, width = 10, height = 6)
 
@@ -270,8 +260,7 @@ tryCatch({
       median_snvs_per_kb = median(snvs_per_kb),
       max_snvs_per_kb = max(snvs_per_kb),
       total_bins = n(),
-      .groups = 'drop'
-    )
+      .groups = 'drop'    )
   print(density_summary)
 
   # ========== Gene-based SNV Analysis ==========

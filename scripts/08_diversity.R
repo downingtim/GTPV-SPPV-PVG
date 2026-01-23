@@ -89,11 +89,6 @@ estimate_theta_watterson <- function(n_snps, region_length, n_samples = 10) {
 # This is a rough estimate based on expected heterozygosity
 estimate_pi_from_sites <- function(snv_subset, region_length, assumed_maf = 0.2) {
   if (nrow(snv_subset) == 0) return(0)
-  
-  # For each biallelic site, estimate pi assuming Hardy-Weinberg equilibrium
-  # pi = 2 * p * (1-p) where p is the minor allele frequency
-  # We'll assume an average MAF for estimation
-  
   n_sites <- nrow(snv_subset)
   
   # Average nucleotide diversity per site assuming MAF
