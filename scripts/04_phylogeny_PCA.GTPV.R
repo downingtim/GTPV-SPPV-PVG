@@ -10,31 +10,37 @@ library(ggrepel)
 library(gridExtra)
 
 # 1. PHYLOGENETIC TREE ANALYSIS
-region_names <- paste0("LSDV", sprintf("%03d", 1:156))
+region_names <- paste0("LSDV", sprintf("%03d", 71:156))
+
+trim_names <- function(names) {
+  sapply(names, function(name) {
+    pos <- regexpr("\\.1", name)
+    if (pos > 0) {
+      substr(name, 1, pos + 1)
+    } else {
+      name   }
+  }, USE.NAMES = FALSE)
+}
 
 # 2. Loop through each region name
 for (region in region_names) {
-  cat("Processing region:", region, "\n")
-  
   # 3. Construct the filenames for the current region
-  tree_file <- paste0( region, ".raxml.supportTBE")
-  genomes_aln <- paste0( "region_", region, ".aln")
+  tree_file <- paste0("GENE_TREE/", region, ".raxml.bestTree")
+  genomes_aln <- paste0( "GENE_FASTA/",  region, ".fasta")
   
   # Check if files exist
   if (!file.exists(tree_file)) {
     cat("Tree file not found for region:", region, "\n")
-    next
-  }
+    next  }
   
-  # Read and process tree
   bootstrap_tree <- read.tree(tree_file)
+  bootstrap_tree$tip.label <- trim_names(bootstrap_tree$tip.label)
   tree_with_support <- ladderize(midpoint(bootstrap_tree))
   
   # Handle node labels safely
   if (!is.null(tree_with_support$node.label)) {
     tree_with_support$node.label <- round(100 * as.numeric(tree_with_support$node.label), 0)
-    tree_with_support$node.label[is.na(tree_with_support$node.label)] <- 0
-  }
+    tree_with_support$node.label[is.na(tree_with_support$node.label)] <- 0  }
   
   # Define genetic groups based on sample names
   group_A_samples <- c("KC951854.1", "MN072621.1", "MH381810.1",
@@ -42,15 +48,14 @@ for (region in region_names) {
   group_B_samples <- c("AY077836.1", "AY077835.1", "KX576657.1",
                        "NC_004003.1", "MN072622.1")  # Group B
   group_C_samples <- c("MN072623.1", "MN072625.1", "MN072624.1")  # Group C
-  
+
   # Create grouping function
   assign_groups <- function(tip_labels) {
     groups <- rep("Other", length(tip_labels))
     groups[tip_labels %in% group_A_samples] <- "2.1"
     groups[tip_labels %in% group_B_samples] <- "2.2"
     groups[tip_labels %in% group_C_samples] <- "2.3"
-    return(groups)
-  }
+    return(groups)  }
   
   # Assign groups to tips
   tip_groups <- assign_groups(tree_with_support$tip.label)
@@ -80,7 +85,7 @@ for (region in region_names) {
     # Read alignment using seqinr
     tryCatch({
       alignment <- read.alignment(genomes_aln, format = "fasta")
-      
+      alignment$nam <- trim_names(alignment$nam)
       # Convert alignment to matrix
       seq_matrix <- as.matrix(alignment)
       
@@ -165,7 +170,7 @@ for (region in region_names) {
       
       # 3. COMBINED VISUALIZATION
       combined_plot <- grid.arrange(p1, p2, ncol = 2)
-      ggsave(paste0(region, "/", region, "_GTPV_combined.pdf"), combined_plot,
+      ggsave(paste0("GENOME/", region, "/", region, "_GTPV_combined.pdf"), combined_plot,
              width = 10, height = 4)
       
     }, error = function(e) {
