@@ -48,9 +48,9 @@ These scripts perform phylogenetic analysis and Principal Component Analysis (PC
     * A VCF file (e.g., `gfavariants.vcf`).
 * **Output**: Quantitative summary of variant types and their genomic distribution.
 
-### **`03_SNP_density.R`**
+### **`03_SNP_density.R`** and **`03_SNP_density.g2.R`** 
 
-* **Purpose**: Generates a comprehensive visualisation of SNP density across the entire genomes of SPPV and GTPV. It plots SNV density in sliding windows and aligns this with a map of the Coding Sequences (CDS) from corresponding GenBank files, highlighting specific regions of interest.
+* **Purpose**: **`03_SNP_density.R`**  generates a comprehensive visualisation of SNP density across the entire genomes of SPPV and GTPV. It plots SNV density in sliding windows and aligns this with a map of the Coding Sequences (CDS) from corresponding GenBank files, highlighting specific regions of interest. **`03_SNP_density.g2.R`** does this again for the clades and to get Tajima's D estimates.
 * **Dependencies (R Packages)**: `ggplot2`, `dplyr`, `readr`, `genbankr`, `patchwork`.
 * **Input Files**:
     * `results_SPPV/vcf/gfavariants.vcf`: VCF file for SPPV.
@@ -118,6 +118,12 @@ Extended versions of the phylogenetic and PCA analysis scripts with additional f
 
 * **Purpose**: Compute SNPs/Kb and mutations/Kb for each gene in GTPV and SPPV.
 * **Output Files**: Tables of diversity metrics (CSV format).
+
+
+### **12_ancient_capv.R**
+
+* **Purpose**: Analyse ancient and pre-modern SPPV samples versus representatives of LSDV, GTPV and modern SPPV.
+* **Output Files**: a table of variants (CVS format) and various plots of overlapping core genome mutations.
 
 ***
 
@@ -249,7 +255,8 @@ The `FIGURES/SPPV/` directory contains:
     sh 10_get_genbank_info.sh
     sh 09_create_genbank_table.sh
 
-
+    # ancient CaPV analysis
+    Rscript 12_ancient_capv.R
 ```
 
 ***

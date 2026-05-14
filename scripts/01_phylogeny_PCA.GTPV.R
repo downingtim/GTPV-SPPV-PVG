@@ -1,4 +1,3 @@
-# Load required libraries
 library(ape)
 library(phangorn)
 library(ggplot2)
